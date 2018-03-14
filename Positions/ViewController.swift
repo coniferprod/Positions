@@ -48,11 +48,11 @@ class ViewController: UIViewController {
             message: "Save \(latitudeString), \(longitudeString) ?",
             preferredStyle: .alert)
         
-        alert.addAction(UIAlertAction(title: "Cancel", style: .destructive) { action in
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { action in
             debugPrint("User cancelled save")
         })
         
-        alert.addAction(UIAlertAction(title: "Save", style: .destructive) { action in
+        alert.addAction(UIAlertAction(title: "Save", style: .default) { action in
             guard let fields = alert.textFields, fields.count == 1 else {
                 return
             }
