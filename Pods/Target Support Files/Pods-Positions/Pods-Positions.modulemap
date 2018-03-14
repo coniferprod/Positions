@@ -1,0 +1,6 @@
+framework module Pods_Positions {
+  umbrella header "Pods-Positions-umbrella.h"
+
+  export *
+  module * { export * }
+}

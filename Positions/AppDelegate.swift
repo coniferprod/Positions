@@ -1,11 +1,3 @@
-//
-//  AppDelegate.swift
-//  Positions
-//
-//  Created by Jere Käpyaho on 14/03/2018.
-//  Copyright © 2018 Conifer Productions Oy. All rights reserved.
-//
-
 import UIKit
 
 @UIApplicationMain
