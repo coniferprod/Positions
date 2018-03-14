@@ -12,6 +12,8 @@ class ViewController: UIViewController {
     var lastKnownLocation: CLLocation? = nil
     var positionCount = 1
     
+    var positionViewModel: PositionViewModel?
+    
     lazy var locationManager: CLLocationManager = {
         $0.delegate = self
         return $0
@@ -32,16 +34,26 @@ class ViewController: UIViewController {
     }
 
     @IBAction func addPosition(_ sender: Any) {
-        debugPrint("addPosition tapped")
-        
         guard let savedLocation = lastKnownLocation else {
             return
         }
-        
+
         let latitude = savedLocation.coordinate.latitude
         let longitude = savedLocation.coordinate.longitude
-        let latitudeString = String(format: "%.5f", latitude)
-        let longitudeString = String(format: "%.5f", longitude)
+        let timestamp = Int(savedLocation.timestamp.timeIntervalSince1970.rounded())
+        var positionDescription = ""
+
+        let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: timestamp, description: positionDescription)
+        
+        self.positionViewModel = PositionViewModel(withPosition: position)
+
+        var latitudeString = "unknown"
+        var longitudeString = "unknown"
+        
+        if let viewModel = positionViewModel {
+            (latitudeString, longitudeString) =
+                viewModel.decimalStringPairFromCoordinates()
+        }
         
         let alert = UIAlertController(
             title: "Save Position",
@@ -58,7 +70,6 @@ class ViewController: UIViewController {
             }
             
             let textField = fields[0]
-            var positionDescription = ""
             if let text = textField.text, text.count > 0 {
                 positionDescription = text
             }
@@ -66,12 +77,8 @@ class ViewController: UIViewController {
                 positionDescription = textField.placeholder ?? "Position"
             }
             
-            let timestamp = Int(savedLocation.timestamp.timeIntervalSince1970.rounded())
-            
-            let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: timestamp, description: positionDescription)
             debugPrint("Pretending to save position \(self.positionCount): \(position)")
             
-
             self.positionCount += 1
         })
         
@@ -82,6 +89,19 @@ class ViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    func updateDisplay(with location: CLLocation) {
+        let latitude = location.coordinate.latitude
+        let longitude = location.coordinate.longitude
+        let timestamp = Int(location.timestamp.timeIntervalSince1970.rounded())
+
+        let position = Position(latitude: latitude, longitude: longitude, altitude: location.altitude, timestamp: timestamp, description: "")
+
+        positionViewModel = PositionViewModel(withPosition: position)
+        if let viewModel = positionViewModel {
+            (latitudeDisplay.caption, longitudeDisplay.caption) = viewModel.decimalStringPairFromCoordinates()
+            altitudeDisplay.caption = viewModel.stringFromAltitude()
+        }
+    }
 }
 
 extension ViewController: CLLocationManagerDelegate {
@@ -92,14 +112,7 @@ extension ViewController: CLLocationManagerDelegate {
         
         debugPrint("didUpdateLocations: \(location)")
         
-        let latitudeString = String(format: "%.5f", location.coordinate.latitude)
-        latitudeDisplay.caption = "\(latitudeString)\u{00B0}"
-        
-        let longitudeString = String(format: "%.5f", location.coordinate.longitude)
-        longitudeDisplay.caption = "\(longitudeString)\u{00B0}"
-        
-        let altitudeString = String(format: "%.2f", location.altitude)
-        altitudeDisplay.caption = "\(altitudeString) m"
+        updateDisplay(with: location)
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
