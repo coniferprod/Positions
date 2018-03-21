@@ -4,7 +4,6 @@ import Eureka
 
 protocol PositionViewDelegate {
     func save(position: Position)
-    func cancel()
 }
 
 class PositionViewController: FormViewController {

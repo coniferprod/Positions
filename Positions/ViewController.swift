@@ -168,8 +168,4 @@ extension ViewController: PositionViewDelegate {
         
         positionCount += 1
     }
-    
-    func cancel() {
-        debugPrint("User cancelled")
-    }
 }
