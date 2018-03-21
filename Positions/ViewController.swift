@@ -71,7 +71,6 @@ class ViewController: UIViewController {
             let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: timestamp, description: positionDescription)
             debugPrint("Pretending to save position \(self.positionCount): \(position)")
             
-
             self.positionCount += 1
         })
         
@@ -82,6 +81,27 @@ class ViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "addPosition" {
+            let vc = segue.destination as! PositionViewController
+            
+            guard let savedLocation = lastKnownLocation else {
+                return
+            }
+            
+            let timestamp = Int(savedLocation.timestamp.timeIntervalSince1970.rounded())
+            
+            let latitude = savedLocation.coordinate.latitude
+            let longitude = savedLocation.coordinate.longitude
+            let positionDescription = "Position 1"
+            let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: timestamp, description: positionDescription)
+            debugPrint("Pretending to save position \(self.positionCount): \(position)")
+
+            vc.position = position
+            vc.positionCount = positionCount
+            vc.delegate = self
+        }
+    }
 }
 
 extension ViewController: CLLocationManagerDelegate {
@@ -124,3 +144,17 @@ extension ViewController: CLLocationManagerDelegate {
  "This app has attempted to access privacy-sensitive data without a usage description. The app's Info.plist must contain an NSLocationWhenInUseUsageDescription key with a string value explaining to the user how the app uses this data"
 */
 
+extension ViewController: PositionViewDelegate {
+    func save(position: Position) {
+        debugPrint("Pretending to save position \(position)")
+        
+        self.navigationController?.popViewController(animated: true)
+        self.dismiss(animated: true, completion: nil)
+        
+        positionCount += 1
+    }
+    
+    func cancel() {
+        debugPrint("User cancelled")
+    }
+}

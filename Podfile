@@ -5,6 +5,7 @@ target 'Positions' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
 
+  pod 'Eureka'
   pod 'LCDView', :git => 'https://github.com/coniferprod/LCDView.git'
 
   target 'PositionsTests' do

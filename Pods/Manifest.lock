@@ -1,7 +1,9 @@
 PODS:
+  - Eureka (4.1.1)
   - LCDView (0.0.4)
 
 DEPENDENCIES:
+  - Eureka
   - LCDView (from `https://github.com/coniferprod/LCDView.git`)
 
 EXTERNAL SOURCES:
@@ -10,12 +12,13 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   LCDView:
-    :commit: 24cc046d69f1def4c0b4b95d845a8ecb260ccdfb
+    :commit: 23993fde1dc25f914505d65418379dc36fed095a
     :git: https://github.com/coniferprod/LCDView.git
 
 SPEC CHECKSUMS:
+  Eureka: b88fb930e42c79f8c03c373d0fcdc28c1d6c50ed
   LCDView: c8264a6f9f004837edec6066da755bae5ea0e706
 
-PODFILE CHECKSUM: e7475c9c667611deb32b94642c59c8f4ac5f7ec6
+PODFILE CHECKSUM: a6ee5f5bda357460daff49423a78c0a4e6a7110d
 
 COCOAPODS: 1.4.0

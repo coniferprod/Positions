@@ -134,6 +134,7 @@
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="qhX-q5-OFJ">
                             <connections>
                                 <action selector="addPosition:" destination="BYZ-38-t0r" id="Qea-8H-u4j"/>
+                                <segue destination="kI7-0W-NFc" kind="show" identifier="addPosition" id="PjN-v7-M1g"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -146,6 +147,28 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="844" y="132.68365817091455"/>
+        </scene>
+        <!--New Position-->
+        <scene sceneID="l3P-N1-Gu7">
+            <objects>
+                <viewController id="kI7-0W-NFc" customClass="PositionViewController" customModule="Positions" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="XEL-C2-rJW">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <viewLayoutGuide key="safeArea" id="hSQ-Pp-7Xz"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="New Position" id="5iH-X8-uo3">
+                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="bcQ-Sa-GzP">
+                            <connections>
+                                <action selector="savePosition:" destination="kI7-0W-NFc" id="Xe1-EV-j8N"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Vzd-wt-qnj" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1834" y="133"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="feY-Wy-DL3">
