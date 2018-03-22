@@ -6,6 +6,7 @@ target 'Positions' do
   use_frameworks!
 
   pod 'Eureka'
+  pod 'XCGLogger', '~> 6.0.2'
   pod 'LCDView', :git => 'https://github.com/coniferprod/LCDView.git'
 
   target 'PositionsTests' do

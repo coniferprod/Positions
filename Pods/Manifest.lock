@@ -1,10 +1,18 @@
 PODS:
   - Eureka (4.1.1)
   - LCDView (0.0.4)
+  - ObjcExceptionBridging (1.0.1):
+    - ObjcExceptionBridging/ObjcExceptionBridging (= 1.0.1)
+  - ObjcExceptionBridging/ObjcExceptionBridging (1.0.1)
+  - XCGLogger (6.0.2):
+    - XCGLogger/Core (= 6.0.2)
+  - XCGLogger/Core (6.0.2):
+    - ObjcExceptionBridging
 
 DEPENDENCIES:
   - Eureka
   - LCDView (from `https://github.com/coniferprod/LCDView.git`)
+  - XCGLogger (~> 6.0.2)
 
 EXTERNAL SOURCES:
   LCDView:
@@ -18,7 +26,9 @@ CHECKOUT OPTIONS:
 SPEC CHECKSUMS:
   Eureka: b88fb930e42c79f8c03c373d0fcdc28c1d6c50ed
   LCDView: c8264a6f9f004837edec6066da755bae5ea0e706
+  ObjcExceptionBridging: c30e00eb3700467e695faeea30e26e18bd445001
+  XCGLogger: c9601cae9a8912de34a58666ba931ed3d624dd31
 
-PODFILE CHECKSUM: a6ee5f5bda357460daff49423a78c0a4e6a7110d
+PODFILE CHECKSUM: db9c4cb2ccaa517888b180bbad5fd197b840923c
 
 COCOAPODS: 1.4.0

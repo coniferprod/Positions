@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         latitudeDisplay.caption += "\u{00B0}"
         longitudeDisplay.caption += "\u{00B0}"
         
@@ -77,7 +77,7 @@ class ViewController: UIViewController {
                 positionDescription = textField.placeholder ?? "Position"
             }
             
-            debugPrint("Pretending to save position \(self.positionCount): \(position)")
+            log.debug("Pretending to save position \(self.positionCount): \(position)")
             
             self.positionCount += 1
         })
@@ -103,7 +103,7 @@ class ViewController: UIViewController {
             let longitude = savedLocation.coordinate.longitude
             let positionDescription = "Position 1"
             let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: timestamp, description: positionDescription)
-            debugPrint("Pretending to save position \(self.positionCount): \(position)")
+            log.debug("Pretending to save position \(self.positionCount): \(position)")
 
             vc.position = position
             vc.positionCount = positionCount
@@ -132,13 +132,13 @@ extension ViewController: CLLocationManagerDelegate {
 
         lastKnownLocation = location
         
-        debugPrint("didUpdateLocations: \(location)")
+        log.debug("didUpdateLocations: \(location)")
         
         updateDisplay(with: location)
     }
     
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        debugPrint("didChangeAuthorization")
+        log.debug("didChangeAuthorization")
         
         guard CLLocationManager.locationServicesEnabled(),
             [.authorizedAlways, .authorizedWhenInUse].contains(CLLocationManager.authorizationStatus())
@@ -148,7 +148,7 @@ extension ViewController: CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        debugPrint(error)
+        log.error(error)
     }
 }
 
@@ -161,7 +161,7 @@ extension ViewController: CLLocationManagerDelegate {
 
 extension ViewController: PositionViewDelegate {
     func save(position: Position) {
-        debugPrint("Pretending to save position \(position)")
+        log.debug("Pretending to save position \(position)")
         
         self.navigationController?.popViewController(animated: true)
         self.dismiss(animated: true, completion: nil)

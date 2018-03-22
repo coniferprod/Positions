@@ -59,7 +59,7 @@ class PositionViewController: FormViewController {
     
 
     @IBAction func savePosition(_ sender: Any) {
-        debugPrint("Save button tapped")
+        log.debug("Save button tapped")
         
         let valuesDictionary = form.values()
         
