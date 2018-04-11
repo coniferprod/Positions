@@ -11,7 +11,7 @@ class ViewController: UIViewController {
     
     var lastKnownLocation: CLLocation? = nil
     var positionCount = 1
-    
+    var savedPositions = [Position]()
     var positionViewModel: PositionViewModel?
     
     lazy var locationManager: CLLocationManager = {
@@ -33,62 +33,6 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
-    @IBAction func addPosition(_ sender: Any) {
-        guard let savedLocation = lastKnownLocation else {
-            return
-        }
-
-        let latitude = savedLocation.coordinate.latitude
-        let longitude = savedLocation.coordinate.longitude
-        let timestamp = Int(savedLocation.timestamp.timeIntervalSince1970.rounded())
-        var positionDescription = ""
-
-        let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: timestamp, description: positionDescription)
-        
-        self.positionViewModel = PositionViewModel(withPosition: position)
-
-        var latitudeString = "unknown"
-        var longitudeString = "unknown"
-        
-        if let viewModel = positionViewModel {
-            (latitudeString, longitudeString) =
-                viewModel.decimalStringPairFromCoordinates()
-        }
-        
-        let alert = UIAlertController(
-            title: "Save Position",
-            message: "Save \(latitudeString), \(longitudeString) ?",
-            preferredStyle: .alert)
-        
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel) { action in
-            debugPrint("User cancelled save")
-        })
-        
-        alert.addAction(UIAlertAction(title: "Save", style: .default) { action in
-            guard let fields = alert.textFields, fields.count == 1 else {
-                return
-            }
-            
-            let textField = fields[0]
-            if let text = textField.text, text.count > 0 {
-                positionDescription = text
-            }
-            else {
-                positionDescription = textField.placeholder ?? "Position"
-            }
-            
-            log.debug("Pretending to save position \(self.positionCount): \(position)")
-            
-            self.positionCount += 1
-        })
-        
-        alert.addTextField { text in
-            text.placeholder = "Position \(self.positionCount)"
-        }
-        
-        present(alert, animated: true, completion: nil)
-    }
-    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "addPosition" {
             let vc = segue.destination as! PositionViewController
@@ -103,11 +47,15 @@ class ViewController: UIViewController {
             let longitude = savedLocation.coordinate.longitude
             let positionDescription = "Position 1"
             let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: timestamp, description: positionDescription)
-            log.debug("Pretending to save position \(self.positionCount): \(position)")
 
             vc.position = position
             vc.positionCount = positionCount
             vc.delegate = self
+        }
+        else if segue.identifier == "showSavedPositions" {
+            let vc = segue.destination as! PositionsTableViewController
+            vc.savedPositions = self.savedPositions
+            
         }
     }
     
@@ -161,11 +109,12 @@ extension ViewController: CLLocationManagerDelegate {
 
 extension ViewController: PositionViewDelegate {
     func save(position: Position) {
-        log.debug("Pretending to save position \(position)")
+        log.debug("Saving position \(position)")
         
         self.navigationController?.popViewController(animated: true)
         self.dismiss(animated: true, completion: nil)
         
+        savedPositions.append(position)
         positionCount += 1
     }
 }
