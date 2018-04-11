@@ -8,6 +8,7 @@ target 'Positions' do
   pod 'Eureka'
   pod 'XCGLogger'
   pod 'GRDB.swift'
+  pod 'DateToolsSwift'
   pod 'LCDView', :git => 'https://github.com/coniferprod/LCDView.git'
 
   target 'PositionsTests' do

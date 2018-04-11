@@ -143,6 +143,7 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/DateToolsSwift/DateToolsSwift.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/GRDB.swift/GRDB.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/LCDView/LCDView.framework"
@@ -150,6 +151,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/XCGLogger/XCGLogger.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
+  install_framework "${BUILT_PRODUCTS_DIR}/DateToolsSwift/DateToolsSwift.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Eureka/Eureka.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/GRDB.swift/GRDB.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/LCDView/LCDView.framework"

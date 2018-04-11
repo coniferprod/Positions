@@ -1,13 +1,11 @@
 import UIKit
 
 import GRDB
-
+import DateToolsSwift
 
 private let positionsSortedByTimestamp = Position.order(Column("timestamp").desc)
 
 class PositionsTableViewController: UITableViewController {
-    var positions: [Position]!
-
     var positionsController: FetchedRecordsController<Position>!
     
     override func viewDidLoad() {
@@ -55,12 +53,6 @@ class PositionsTableViewController: UITableViewController {
    
     }
     
-    private func loadPositions() {
-        positions = try! dbQueue.inDatabase { db in
-            try Position.order(Column("timestamp").desc).fetchAll(db)
-        }
-    }
-    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -78,7 +70,9 @@ class PositionsTableViewController: UITableViewController {
 
     func configure(_ cell: UITableViewCell, at indexPath: IndexPath) {
         let position = positionsController.record(at: indexPath)
-        cell.textLabel?.text = position.description
+        let timeAgo = position.timestamp.timeAgoSinceNow
+        let text = position.description ?? "(no description)"
+        cell.textLabel?.text = "\(text) (\(timeAgo))"
         cell.detailTextLabel?.text = "\(position.latitude), \(position.longitude) (\(position.altitude) m)"
     }
     
