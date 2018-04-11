@@ -75,7 +75,7 @@ class PositionViewController: FormViewController {
         let longitude = self.position?.longitude
         let altitude = self.position?.altitude
 
-        let position = Position(latitude: latitude!, longitude: longitude!, altitude: altitude!, timestamp: Int(Date().timeIntervalSince1970.rounded()), description: description)
+        let position = Position(latitude: latitude!, longitude: longitude!, altitude: altitude!, timestamp: Date(), description: description)
         self.delegate?.save(position: position)
     }
     

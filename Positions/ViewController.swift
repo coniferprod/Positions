@@ -41,30 +41,22 @@ class ViewController: UIViewController {
                 return
             }
             
-            let timestamp = Int(savedLocation.timestamp.timeIntervalSince1970.rounded())
-            
             let latitude = savedLocation.coordinate.latitude
             let longitude = savedLocation.coordinate.longitude
             let positionDescription = "Position 1"
-            let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: timestamp, description: positionDescription)
+            let position = Position(latitude: latitude, longitude: longitude, altitude: savedLocation.altitude, timestamp: savedLocation.timestamp, description: positionDescription)
 
             vc.position = position
             vc.positionCount = positionCount
             vc.delegate = self
-        }
-        else if segue.identifier == "showSavedPositions" {
-            let vc = segue.destination as! PositionsTableViewController
-            vc.savedPositions = self.savedPositions
-            
         }
     }
     
     func updateDisplay(with location: CLLocation) {
         let latitude = location.coordinate.latitude
         let longitude = location.coordinate.longitude
-        let timestamp = Int(location.timestamp.timeIntervalSince1970.rounded())
 
-        let position = Position(latitude: latitude, longitude: longitude, altitude: location.altitude, timestamp: timestamp, description: "")
+        let position = Position(latitude: latitude, longitude: longitude, altitude: location.altitude, timestamp: location.timestamp, description: "")
 
         positionViewModel = PositionViewModel(withPosition: position)
         if let viewModel = positionViewModel {
@@ -113,6 +105,10 @@ extension ViewController: PositionViewDelegate {
         
         self.navigationController?.popViewController(animated: true)
         self.dismiss(animated: true, completion: nil)
+        
+        try! dbQueue.inDatabase { db in
+            try position.insert(db)
+        }
         
         savedPositions.append(position)
         positionCount += 1

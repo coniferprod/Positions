@@ -1,22 +1,64 @@
 import UIKit
 
-class PositionsTableViewController: UITableViewController {
-    var savedPositions = [Position]()
+import GRDB
 
+
+private let positionsSortedByTimestamp = Position.order(Column("timestamp").desc)
+
+class PositionsTableViewController: UITableViewController {
+    var positions: [Position]!
+
+    var positionsController: FetchedRecordsController<Position>!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        positionsController = try! FetchedRecordsController(dbQueue, request: positionsSortedByTimestamp)
+        positionsController.trackChanges(
+            willChange: { [unowned self] _ in
+                self.tableView.beginUpdates()
+            },
+            onChange: { [unowned self] (controller, record, change) in
+                switch change {
+                case .insertion(let indexPath):
+                    self.tableView.insertRows(at: [indexPath], with: .fade)
+                    
+                case .deletion(let indexPath):
+                    self.tableView.deleteRows(at: [indexPath], with: .fade)
+                    
+                case .update(let indexPath, _):
+                    if let cell = self.tableView.cellForRow(at: indexPath) {
+                        self.configure(cell, at: indexPath)
+                    }
+                    
+                case .move(let indexPath, let newIndexPath, _):
+                    let cell = self.tableView.cellForRow(at: indexPath)
+                    self.tableView.moveRow(at: indexPath, to: newIndexPath)
+                    if let cell = cell {
+                        self.configure(cell, at: newIndexPath)
+                    }
+                }
+            },
+            didChange: { [unowned self] _ in
+                self.tableView.endUpdates()
+            })
+        try! positionsController.performFetch()
+        
+        self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-        tableView.reloadData()
+   
+    }
+    
+    private func loadPositions() {
+        positions = try! dbQueue.inDatabase { db in
+            try Position.order(Column("timestamp").desc).fetchAll(db)
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -27,20 +69,22 @@ class PositionsTableViewController: UITableViewController {
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return positionsController.sections.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return savedPositions.count
+        return positionsController.sections[section].numberOfRecords
     }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "PositionCell", for: indexPath)
-
-        let position = savedPositions[indexPath.row]
+    func configure(_ cell: UITableViewCell, at indexPath: IndexPath) {
+        let position = positionsController.record(at: indexPath)
         cell.textLabel?.text = position.description
         cell.detailTextLabel?.text = "\(position.latitude), \(position.longitude) (\(position.altitude) m)"
-
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "PositionCell", for: indexPath)
+        configure(cell, at: indexPath)
         return cell
     }
 
@@ -52,17 +96,12 @@ class PositionsTableViewController: UITableViewController {
     }
     */
 
-    /*
-    // Override to support editing the table view.
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+        let position = positionsController.record(at: indexPath)
+        try! dbQueue.inDatabase { db in
+            _ = try position.delete(db)
+        }
     }
-    */
 
     /*
     // Override to support rearranging the table view.

@@ -1,8 +1,12 @@
 import UIKit
 
 import XCGLogger
+import GRDB
 
 let log = XCGLogger.default
+
+// The shared database queue
+var dbQueue: DatabaseQueue!
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -12,6 +16,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         log.setup(level: .debug, showThreadName: true, showLevel: true, showFileNames: true, showLineNumbers: true, writeToFile: nil, fileLevel: nil)
+        
+        try! setupDatabase(application)
         
         return true
     }
@@ -38,6 +44,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-
+    private func setupDatabase(_ application: UIApplication) throws {
+        let databaseURL = try FileManager.default
+            .url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            .appendingPathComponent("Positions.sqlite3")
+        dbQueue = try AppDatabase.openDatabase(atPath: databaseURL.path)
+        
+        // Be a nice iOS citizen, and don't consume too much memory
+        // See https://github.com/groue/GRDB.swift/#memory-management
+        dbQueue.setupMemoryManagement(in: application)
+    }
 }
-
