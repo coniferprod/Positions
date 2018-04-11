@@ -9,11 +9,11 @@ Coordinates are displayed using an "LCD" view from the [LCDView](https://github.
 ## Requirements
 
 * iOS 10.3 and up
-* Xcode 9.2
-* Swift 4.x
+* Xcode 9.3
+* Swift 4.1
 
 ## Coming up
 
-* Saving positions to a local database
-* Viewing and deleting positions
+* ~~Saving positions to a local database~~ DONE
+* ~~Viewing and deleting positions~~ DONE
 * Positions on a map
