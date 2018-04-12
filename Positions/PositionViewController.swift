@@ -92,8 +92,7 @@ class PositionViewController: FormViewController {
         var description = ""
         if let _ = valuesDictionary["description"] {
             let row: TextRow? = form.rowBy(tag: "description")
-            description = row?.placeholder ?? ""
-            
+            description = row?.value ?? ""
         }
 
         // TODO: Check if the user has changed the coordinates
