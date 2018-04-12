@@ -73,8 +73,11 @@ class PositionsTableViewController: UITableViewController {
         let position = positionsController.record(at: indexPath)
         let timeAgo = position.timestamp.timeAgoSinceNow
         let text = position.description ?? "(no description)"
-        cell.textLabel?.text = "\(text) (\(timeAgo))"
-        cell.detailTextLabel?.text = "\(position.latitude), \(position.longitude) (\(position.altitude) m)"
+        cell.textLabel?.text = "\(text) – \(timeAgo)"
+        let lat = String(format: "%.5f", position.latitude)
+        let lon = String(format: "%.5f", position.longitude)
+        let alt = String(format: "%.1f", position.altitude)
+        cell.detailTextLabel?.text = "\(lat), \(lon) (\(alt) m)"
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
