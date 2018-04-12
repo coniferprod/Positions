@@ -18,14 +18,6 @@ DEPENDENCIES:
   - LCDView (from `https://github.com/coniferprod/LCDView.git`)
   - XCGLogger
 
-SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
-    - DateToolsSwift
-    - Eureka
-    - GRDB.swift
-    - ObjcExceptionBridging
-    - XCGLogger
-
 EXTERNAL SOURCES:
   LCDView:
     :git: https://github.com/coniferprod/LCDView.git
@@ -45,4 +37,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: d71c8764cde8876b599b9a2ba52ccb13801ca6e2
 
-COCOAPODS: 1.5.0
+COCOAPODS: 1.4.0
