@@ -178,7 +178,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Vzd-wt-qnj" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1866" y="133"/>
+            <point key="canvasLocation" x="2874" y="159"/>
         </scene>
         <!--Saved positions-->
         <scene sceneID="I0M-AN-iqr">
@@ -189,11 +189,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="PositionCell" textLabel="Xdw-1a-Noy" detailTextLabel="EH3-I8-Waj" style="IBUITableViewCellStyleSubtitle" id="ZKJ-Ih-jeR">
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="PositionCell" textLabel="Xdw-1a-Noy" detailTextLabel="EH3-I8-Waj" style="IBUITableViewCellStyleSubtitle" id="ZKJ-Ih-jeR">
                                 <rect key="frame" x="0.0" y="28" width="375" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="ZKJ-Ih-jeR" id="ErU-16-LF1">
-                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="341" height="43.5"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" insetsLayoutMarginsFromSafeArea="NO" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="Xdw-1a-Noy">
@@ -219,6 +219,9 @@
                             <outlet property="delegate" destination="GG5-f2-LRu" id="ye9-7d-0q1"/>
                         </connections>
                     </tableView>
+                    <connections>
+                        <segue destination="kI7-0W-NFc" kind="show" identifier="showPosition" id="Chk-jP-VvT"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="B1y-sy-SFo" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -243,4 +246,7 @@
             <point key="canvasLocation" x="30" y="133"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="Chk-jP-VvT"/>
+    </inferredMetricsTieBreakers>
 </document>

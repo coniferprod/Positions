@@ -10,6 +10,7 @@ class PositionViewController: FormViewController {
     var position: Position?
     var positionCount = 1
     var delegate: PositionViewDelegate?
+    var isNewPosition = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,11 +53,36 @@ class PositionViewController: FormViewController {
             }
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        if let position = position {
+            if let row = form.rowBy(tag: "description") as? TextRow {
+                row.value = position.description ?? ""
+            }
+            if let row = form.rowBy(tag: "latitude") as? TextRow {
+                row.value = String(position.latitude)
+            }
+            if let row = form.rowBy(tag: "longitude") as? TextRow {
+                row.value = String(position.longitude)
+            }
+            if let row = form.rowBy(tag: "altitude") as? TextRow {
+                row.value = String(position.altitude)
+            }
+        }
+        
+        if isNewPosition {
+            self.navigationItem.title = "New Position"
+            self.navigationItem.rightBarButtonItem?.isEnabled = true
+        }
+        else {
+            self.navigationItem.title = "Position"
+            self.navigationItem.rightBarButtonItem?.isEnabled = false
+        }
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
 
     @IBAction func savePosition(_ sender: Any) {
         log.debug("Save button tapped")
@@ -78,5 +104,4 @@ class PositionViewController: FormViewController {
         let position = Position(latitude: latitude!, longitude: longitude!, altitude: altitude!, timestamp: Date(), description: description)
         self.delegate?.save(position: position)
     }
-    
 }

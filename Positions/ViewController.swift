@@ -11,7 +11,6 @@ class ViewController: UIViewController {
     
     var lastKnownLocation: CLLocation? = nil
     var positionCount = 1
-    var savedPositions = [Position]()
     var positionViewModel: PositionViewModel?
     
     lazy var locationManager: CLLocationManager = {
@@ -49,6 +48,7 @@ class ViewController: UIViewController {
             vc.position = position
             vc.positionCount = positionCount
             vc.delegate = self
+            vc.isNewPosition = true
         }
     }
     
@@ -110,7 +110,6 @@ extension ViewController: PositionViewDelegate {
             try position.insert(db)
         }
         
-        savedPositions.append(position)
         positionCount += 1
     }
 }

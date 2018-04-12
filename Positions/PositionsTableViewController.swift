@@ -7,6 +7,7 @@ private let positionsSortedByTimestamp = Position.order(Column("timestamp").desc
 
 class PositionsTableViewController: UITableViewController {
     var positionsController: FetchedRecordsController<Position>!
+    var latestPosition: Position?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -112,14 +113,25 @@ class PositionsTableViewController: UITableViewController {
     }
     */
 
-    /*
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        log.info("Prepare for segue '\(String(describing: segue.identifier))'")
+        if segue.identifier == "showPosition" {
+            if let position = latestPosition {
+                let vc = segue.destination as! PositionViewController
+                vc.position = position
+                log.info("Did set the position of the view controller to \(String(describing: position.description))")
+            }
+        }
     }
-    */
 
+    // MARK: - Table view delegate
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let position = positionsController.record(at: indexPath)
+        log.info("Selected row \(indexPath.row), corresponds to position \(position)")
+        latestPosition = position
+        performSegue(withIdentifier: "showPosition", sender: nil)
+    }
 }
