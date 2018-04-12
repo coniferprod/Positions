@@ -2,7 +2,7 @@ PODS:
   - DateToolsSwift (4.0.0)
   - Eureka (4.1.1)
   - GRDB.swift (2.10.0)
-  - LCDView (0.0.4)
+  - LCDView (0.0.5)
   - ObjcExceptionBridging (1.0.1):
     - ObjcExceptionBridging/ObjcExceptionBridging (= 1.0.1)
   - ObjcExceptionBridging/ObjcExceptionBridging (1.0.1)
@@ -32,14 +32,14 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   LCDView:
-    :commit: 23993fde1dc25f914505d65418379dc36fed095a
+    :commit: 36d8750ac43e1e023d605ffe0b1d411514158bc7
     :git: https://github.com/coniferprod/LCDView.git
 
 SPEC CHECKSUMS:
   DateToolsSwift: 875d97ff9e3a5d54abdd67a269b3f51c757b71ab
   Eureka: b88fb930e42c79f8c03c373d0fcdc28c1d6c50ed
   GRDB.swift: 9859cab1b990eac62ee550d3d2208ec1b44f76af
-  LCDView: c8264a6f9f004837edec6066da755bae5ea0e706
+  LCDView: ccb3c1c8ccc45c0cbce0111bebe778da305ee719
   ObjcExceptionBridging: c30e00eb3700467e695faeea30e26e18bd445001
   XCGLogger: c9601cae9a8912de34a58666ba931ed3d624dd31
 

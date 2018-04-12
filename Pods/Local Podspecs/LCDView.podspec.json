@@ -1,6 +1,6 @@
 {
   "name": "LCDView",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "summary": "LCD display component for UIKit",
   "description": "UIKit custom component that emulates an LCD panel.",
   "homepage": "https://github.com/coniferprod/LCDView",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/coniferprod/LCDView.git",
-    "tag": "0.0.4"
+    "tag": "0.0.5"
   },
   "social_media_url": "https://twitter.com/coniferprod",
   "platforms": {
