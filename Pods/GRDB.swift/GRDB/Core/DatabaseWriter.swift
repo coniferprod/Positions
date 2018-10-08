@@ -1,3 +1,5 @@
+import Dispatch
+
 /// The protocol for all types that can update a database.
 ///
 /// It is adopted by DatabaseQueue and DatabasePool.
@@ -23,8 +25,13 @@ public protocol DatabaseWriter : DatabaseReader {
     /// Eventual concurrent database updates are postponed until the block
     /// has executed.
     ///
+    /// Eventual concurrent reads are guaranteed not to see any changes
+    /// performed in the block until they are all saved in the database.
+    ///
+    /// The block may, or may not, be wrapped inside a transaction.
+    ///
     /// This method is *not* reentrant.
-    func write<T>(_ block: (Database) throws -> T) rethrows -> T
+    func write<T>(_ block: (Database) throws -> T) throws -> T
     
     /// Synchronously executes a block that takes a database connection, and
     /// returns its result.
@@ -32,12 +39,31 @@ public protocol DatabaseWriter : DatabaseReader {
     /// Eventual concurrent database updates are postponed until the block
     /// has executed.
     ///
+    /// Eventual concurrent reads may see changes performed in the block before
+    /// the block completes.
+    ///
+    /// The block is guaranteed to be executed outside of a transaction.
+    ///
+    /// This method is *not* reentrant.
+    func writeWithoutTransaction<T>(_ block: (Database) throws -> T) rethrows -> T
+    
+    /// Synchronously executes a block that takes a database connection, and
+    /// returns its result.
+    ///
+    /// Eventual concurrent database updates are postponed until the block
+    /// has executed.
+    ///
+    /// Eventual concurrent reads may see changes performed in the block before
+    /// the block completes.
+    ///
     /// This method is reentrant. It should be avoided because it fosters
     /// dangerous concurrency practices.
     func unsafeReentrantWrite<T>(_ block: (Database) throws -> T) rethrows -> T
-
+    
     // MARK: - Reading from Database
     
+    /// This method is deprecated. Use concurrentRead instead.
+    ///
     /// Synchronously or asynchronously executes a read-only block that takes a
     /// database connection.
     ///
@@ -50,15 +76,50 @@ public protocol DatabaseWriter : DatabaseReader {
     ///
     /// For example:
     ///
-    ///     try writer.write { db in
-    ///         try db.execute("DELETE FROM players")
+    ///     try writer.writeWithoutTransaction { db in
+    ///         try db.execute("DELETE FROM player")
     ///         try writer.readFromCurrentState { db in
     ///             // Guaranteed to be zero
-    ///             try Int.fetchOne(db, "SELECT COUNT(*) FROM players")!
+    ///             try Int.fetchOne(db, "SELECT COUNT(*) FROM player")!
     ///         }
-    ///         try db.execute("INSERT INTO players ...")
+    ///         try db.execute("INSERT INTO player ...")
     ///     }
+    @available(*, deprecated, message: "Use concurrentRead instead")
     func readFromCurrentState(_ block: @escaping (Database) -> Void) throws
+    
+    /// Concurrently executes a read-only block that takes a
+    /// database connection.
+    ///
+    /// This method must be called from a writing dispatch queue, outside of any
+    /// transaction. You'll get a fatal error otherwise.
+    ///
+    /// The *block* argument is guaranteed to see the database in the last
+    /// committed state at the moment this method is called. Eventual concurrent
+    /// database updates are *not visible* inside the block.
+    ///
+    /// This method returns as soon as the isolation guarantees described above
+    /// are established. To access the fetched results, you call the wait()
+    /// method of the returned future, on any dispatch queue.
+    ///
+    /// In the example below, the number of players is fetched concurrently with
+    /// the player insertion. Yet the future is guaranteed to return zero:
+    ///
+    ///     try writer.writeWithoutTransaction { db in
+    ///         // Delete all players
+    ///         try Player.deleteAll()
+    ///
+    ///         // Count players concurrently
+    ///         let future = writer.concurrentRead { db in
+    ///             return try Player.fetchCount()
+    ///         }
+    ///
+    ///         // Insert a player
+    ///         try Player(...).insert(db)
+    ///
+    ///         // Guaranteed to be zero
+    ///         let count = try future.wait()
+    ///     }
+    func concurrentRead<T>(_ block: @escaping (Database) throws -> T) -> Future<T>
 }
 
 extension DatabaseWriter {
@@ -73,12 +134,121 @@ extension DatabaseWriter {
     ///   the observer lifetime (observation lasts until observer
     ///   is deallocated).
     public func add(transactionObserver: TransactionObserver, extent: Database.TransactionObservationExtent = .observerLifetime) {
-        write { $0.add(transactionObserver: transactionObserver, extent: extent) }
+        writeWithoutTransaction { $0.add(transactionObserver: transactionObserver, extent: extent) }
     }
     
     /// Remove a transaction observer.
     public func remove(transactionObserver: TransactionObserver) {
-        write { $0.remove(transactionObserver: transactionObserver) }
+        writeWithoutTransaction { $0.remove(transactionObserver: transactionObserver) }
+    }
+    
+    // MARK: - Erasing the content of the database
+    
+    /// Erases the content of the database.
+    ///
+    /// - precondition: database is not accessed concurrently during the
+    ///   execution of this method.
+    public func erase() throws {
+        #if SQLITE_HAS_CODEC
+        // SQLCipher does not support the backup API: https://discuss.zetetic.net/t/using-the-sqlite-online-backup-api/2631
+        // So we'll drop all database objects one after the other.
+        try writeWithoutTransaction { db in
+            // Prevent foreign keys from messing with drop table statements
+            let foreignKeysEnabled = try Bool.fetchOne(db, "PRAGMA foreign_keys")!
+            if foreignKeysEnabled {
+                try db.execute("PRAGMA foreign_keys = OFF")
+            }
+            
+            // Remove all database objects, one after the other
+            do {
+                try db.inTransaction {
+                    while let row = try Row.fetchOne(db, "SELECT type, name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'") {
+                        let type: String = row["type"]
+                        let name: String = row["name"]
+                        try db.execute("DROP \(type) \(name.quotedDatabaseIdentifier)")
+                    }
+                    return .commit
+                }
+                
+                // Restore foreign keys if needed
+                if foreignKeysEnabled {
+                    try db.execute("PRAGMA foreign_keys = ON")
+                }
+            } catch {
+                // Restore foreign keys if needed
+                if foreignKeysEnabled {
+                    try? db.execute("PRAGMA foreign_keys = ON")
+                }
+                throw error
+            }
+        }
+        #else
+        try DatabaseQueue().backup(to: self)
+        #endif
+    }
+    
+    // MARK: - Reading from Database
+    
+    /// Default implementation, based on the deprecated readFromCurrentState.
+    ///
+    /// :nodoc:
+    public func concurrentRead<T>(_ block: @escaping (Database) throws -> T) -> Future<T> {
+        let semaphore = DispatchSemaphore(value: 0)
+        var result: Result<T>? = nil
+
+        do {
+            try readFromCurrentState { db in
+                result = Result { try block(db) }
+                semaphore.signal()
+            }
+        } catch {
+            result = .failure(error)
+            semaphore.signal()
+        }
+
+        return Future {
+            _ = semaphore.wait(timeout: .distantFuture)
+
+            switch result! {
+            case .failure(let error):
+                throw error
+            case .success(let result):
+                return result
+            }
+        }
+    }
+    
+    // MARK: - Claiming Disk Space
+    
+    /// Rebuilds the database file, repacking it into a minimal amount of
+    /// disk space.
+    ///
+    /// See https://www.sqlite.org/lang_vacuum.html for more information.
+    public func vacuum() throws {
+        try writeWithoutTransaction { try $0.execute("VACUUM") }
+    }
+}
+
+/// A future value.
+public class Future<Value> {
+    private var consumed = false
+    private let _wait: () throws -> Value
+    
+    init(_ wait: @escaping () throws -> Value) {
+        _wait = wait
+    }
+    
+    /// Blocks the current thread until the value is available, and returns it.
+    ///
+    /// It is a programmer error to call this method several times.
+    ///
+    /// - throws: Any error that prevented the value from becoming available.
+    public func wait() throws -> Value {
+        // Not thread-safe and quick and dirty.
+        // Goal is that users learn not to call this method twice.
+        GRDBPrecondition(consumed == false, "Future.wait() must be called only once")
+        consumed = true
+        return try _wait()
     }
 }
 
@@ -112,15 +282,26 @@ public final class AnyDatabaseWriter : DatabaseWriter {
     }
 
     /// :nodoc:
+    @available(*, deprecated, message: "Use concurrentRead instead")
     public func readFromCurrentState(_ block: @escaping (Database) -> Void) throws {
         try base.readFromCurrentState(block)
+    }
+    
+    /// :nodoc:
+    public func concurrentRead<T>(_ block: @escaping (Database) throws -> T) -> Future<T> {
+        return base.concurrentRead(block)
     }
 
     // MARK: - Writing in Database
 
     /// :nodoc:
-    public func write<T>(_ block: (Database) throws -> T) rethrows -> T {
+    public func write<T>(_ block: (Database) throws -> T) throws -> T {
         return try base.write(block)
+    }
+    
+    /// :nodoc:
+    public func writeWithoutTransaction<T>(_ block: (Database) throws -> T) rethrows -> T {
+        return try base.writeWithoutTransaction(block)
     }
 
     /// :nodoc:

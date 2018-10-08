@@ -94,7 +94,7 @@ class PositionsTableViewController: UITableViewController {
     }
     */
 
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         let position = positionsController.record(at: indexPath)
         try! dbQueue.inDatabase { db in
             _ = try position.delete(db)
